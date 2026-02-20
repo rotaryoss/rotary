@@ -1,0 +1,23 @@
+# Example rotation playbook for Stripe API keys.
+# Playbooks describe how to rotate a specific type of secret.
+
+[playbook]
+name = "stripe-api-key"
+description = "Rotate Stripe secret API key"
+patterns = ["stripe"]
+
+[[steps]]
+action = "generate"
+description = "Generate a new restricted key in the Stripe Dashboard under Developers > API Keys."
+
+[[steps]]
+action = "deploy"
+description = "Update the STRIPE_SECRET_KEY in your vault and deploy the new value to all environments."
+
+[[steps]]
+action = "verify"
+description = "Confirm payments are processing with the new key by checking Stripe's event log."
+
+[[steps]]
+action = "revoke"
+description = "Revoke the old key in the Stripe Dashboard."

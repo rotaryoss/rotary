@@ -1,0 +1,22 @@
+[package]
+name = "rotary-scanner"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Health check engine for the Rotary secret health auditor"
+keywords = ["secrets", "security", "scanner", "audit"]
+categories = ["development-tools"]
+
+[dependencies]
+rotary-core = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+ignore = "0.4"
+
+[dev-dependencies]
+tokio = { workspace = true }
+tempfile = "3"
