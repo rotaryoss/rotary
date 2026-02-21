@@ -16,9 +16,9 @@ homepage = "https://github.com/rotaryoss/rotary"
 description = "Audit secret health across your vaults"
 
 [workspace.dependencies]
-rotaryoss-core = { path = "crates/rotary-core" }
-rotaryoss-connectors = { path = "crates/rotary-connectors" }
-rotaryoss-scanner = { path = "crates/rotary-scanner" }
+rotaryoss-core = { version = "0.1.0", path = "crates/rotary-core" }
+rotaryoss-connectors = { version = "0.1.0", path = "crates/rotary-connectors" }
+rotaryoss-scanner = { version = "0.1.0", path = "crates/rotary-scanner" }
 
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
