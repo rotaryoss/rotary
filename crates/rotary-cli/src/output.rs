@@ -1,5 +1,5 @@
 use colored::Colorize;
-use rotary_core::{HealthReport, Playbook, SecretMetadata, Severity};
+use rotaryoss_core::{HealthReport, Playbook, SecretMetadata, Severity};
 
 pub fn print_report(report: &HealthReport) {
     println!();

@@ -22,7 +22,7 @@ $ rotary scan
 
 ```bash
 # From crates.io
-cargo install rotary-cli
+cargo install rotaryoss-cli
 
 # From source
 git clone https://github.com/rotaryoss/rotary.git

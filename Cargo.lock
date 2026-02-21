@@ -583,15 +583,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a96887878f22d7bad8a3b6dc5b7440e0ada9a245242924394987b21cf2210a4c"
 
 [[package]]
-name = "rotary-cli"
+name = "rotaryoss-cli"
 version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
  "colored",
- "rotary-connectors",
- "rotary-core",
- "rotary-scanner",
+ "rotaryoss-connectors",
+ "rotaryoss-core",
+ "rotaryoss-scanner",
  "serde",
  "serde_json",
  "tokio",
@@ -601,12 +601,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "rotary-connectors"
+name = "rotaryoss-connectors"
 version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
- "rotary-core",
+ "rotaryoss-core",
  "serde",
  "serde_json",
  "thiserror",
@@ -615,7 +615,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rotary-core"
+name = "rotaryoss-core"
 version = "0.1.0"
 dependencies = [
  "async-trait",
@@ -627,13 +627,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "rotary-scanner"
+name = "rotaryoss-scanner"
 version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
  "ignore",
- "rotary-core",
+ "rotaryoss-core",
  "serde",
  "tempfile",
  "thiserror",

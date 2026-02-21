@@ -50,7 +50,7 @@ jobs:
           key: ${{ matrix.target }}
 
       - name: Build
-        run: cargo build --release --target ${{ matrix.target }} -p rotary-cli
+        run: cargo build --release --target ${{ matrix.target }} -p rotaryoss-cli
 
       - name: Package (unix)
         if: matrix.archive == 'tar.gz'
@@ -99,10 +99,10 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
-          cargo publish -p rotary-core --no-verify
+          cargo publish -p rotaryoss-core --no-verify
           sleep 30
-          cargo publish -p rotary-connectors --no-verify
+          cargo publish -p rotaryoss-connectors --no-verify
           sleep 30
-          cargo publish -p rotary-scanner --no-verify
+          cargo publish -p rotaryoss-scanner --no-verify
           sleep 30
-          cargo publish -p rotary-cli --no-verify
+          cargo publish -p rotaryoss-cli --no-verify

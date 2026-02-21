@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use chrono::Utc;
-use rotary_core::{HealthCheck, HealthReport, HealthScore, RotaryError, SecretSource, Severity};
+use rotaryoss_core::{HealthCheck, HealthReport, HealthScore, RotaryError, SecretSource, Severity};
 
 use crate::rules::ScanConfig;
 use crate::usage;
@@ -156,7 +156,7 @@ mod tests {
     use std::fs;
 
     use chrono::{Duration, Utc};
-    use rotary_core::{AuditEntry, RotaryError, SecretMetadata, SecretSource, Severity};
+    use rotaryoss_core::{AuditEntry, RotaryError, SecretMetadata, SecretSource, Severity};
 
     use super::*;
     use crate::rules::ScanConfig;

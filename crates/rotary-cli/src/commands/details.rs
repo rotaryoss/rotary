@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use rotary_core::{
+use rotaryoss_core::{
     find_matching_playbook, load_playbooks, RotaryConfig, RotaryError, SecretSource,
 };
 

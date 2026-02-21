@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use rotary_core::{RotaryConfig, RotaryError};
+use rotaryoss_core::{RotaryConfig, RotaryError};
 
 pub fn run(dir: &Path) -> Result<(), RotaryError> {
     let target = dir.join("rotary.toml");

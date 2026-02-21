@@ -1,5 +1,5 @@
 [package]
-name = "rotary-connectors"
+name = "rotaryoss-connectors"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,7 +9,7 @@ keywords = ["secrets", "security", "dotenv", "vault"]
 categories = ["development-tools"]
 
 [dependencies]
-rotary-core = { workspace = true }
+rotaryoss-core = { workspace = true }
 chrono = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

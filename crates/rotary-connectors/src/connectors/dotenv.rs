@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Utc};
-use rotary_core::{AuditEntry, RotaryError, SecretMetadata, SecretSource};
+use rotaryoss_core::{AuditEntry, RotaryError, SecretMetadata, SecretSource};
 
 /// Reads secrets from a `.env` file on disk.
 ///

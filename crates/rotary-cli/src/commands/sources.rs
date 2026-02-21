@@ -1,5 +1,5 @@
-use rotary_connectors::DotEnvSource;
-use rotary_core::{RotaryError, SecretSource, SourceEntry};
+use rotaryoss_connectors::DotEnvSource;
+use rotaryoss_core::{RotaryError, SecretSource, SourceEntry};
 
 /// Build a `SecretSource` from a config entry.
 ///

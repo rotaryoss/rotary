@@ -1,5 +1,5 @@
-use rotary_core::{RotaryConfig, RotaryError};
-use rotary_scanner::{ScanConfig, Scanner};
+use rotaryoss_core::{RotaryConfig, RotaryError};
+use rotaryoss_scanner::{ScanConfig, Scanner};
 
 use super::sources::{build_source, build_source_adhoc};
 use crate::output;
