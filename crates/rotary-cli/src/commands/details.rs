@@ -4,7 +4,7 @@ use rotary_core::{
     find_matching_playbook, load_playbooks, RotaryConfig, RotaryError, SecretSource,
 };
 
-use super::sources::build_source;
+use super::sources::{build_source, build_source_adhoc};
 use crate::output;
 
 pub async fn run(
@@ -20,7 +20,7 @@ pub async fn run(
         source_flag
     {
         let env = env_flag.unwrap_or("default").to_string();
-        let source = build_source(source_name, path_flag, &env)?;
+        let source = build_source_adhoc(source_name, path_flag, &env)?;
         vec![(source, env)]
     } else {
         let (config, config_dir) = RotaryConfig::find_and_load(&cwd)?.ok_or_else(|| {
@@ -40,18 +40,19 @@ pub async fn run(
             .sources
             .iter()
             .filter_map(|entry| {
-                let resolved_path = entry.path.as_ref().map(|p| {
+                let mut resolved = entry.clone();
+                if let Some(ref p) = resolved.path {
                     let pb = PathBuf::from(p);
                     if pb.is_relative() {
-                        config_dir.join(pb).to_string_lossy().into_owned()
-                    } else {
-                        p.clone()
+                        resolved.path =
+                            Some(config_dir.join(pb).to_string_lossy().into_owned());
                     }
-                });
-                let env = env_flag.unwrap_or(&entry.environment).to_string();
-                build_source(&entry.source_type, resolved_path.as_deref(), &env)
-                    .ok()
-                    .map(|s| (s, env))
+                }
+                if let Some(env_override) = env_flag {
+                    resolved.environment = env_override.to_string();
+                }
+                let env = resolved.environment.clone();
+                build_source(&resolved).ok().map(|s| (s, env))
             })
             .collect()
     };

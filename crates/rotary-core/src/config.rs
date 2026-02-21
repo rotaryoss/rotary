@@ -69,6 +69,11 @@ pub struct SourceEntry {
     /// Environment label.
     #[serde(default = "default_environment")]
     pub environment: String,
+
+    /// Connector-specific settings (e.g. token, project, region).
+    /// Arbitrary key-value pairs forwarded to the connector constructor.
+    #[serde(default, flatten)]
+    pub settings: std::collections::HashMap<String, String>,
 }
 
 fn default_environment() -> String {
@@ -99,7 +104,7 @@ impl RotaryConfig {
     /// Generate a starter config file.
     pub fn starter() -> String {
         r#"# Rotary configuration
-# Docs: https://github.com/rotary-dev/rotary
+# Docs: https://github.com/rotaryoss/rotary
 
 [scan]
 max_age_days = 90
@@ -108,6 +113,7 @@ project_root = "."
 
 # Add your secret sources below.
 # Each [[sources]] block defines one source to scan.
+# Connector-specific settings go as extra keys on the source entry.
 
 # Example: scan a local .env file
 # [[sources]]
@@ -116,12 +122,14 @@ project_root = "."
 # path = ".env"
 # environment = "development"
 
-# Example: scan a production .env file
+# Example: Doppler (requires token and project)
 # [[sources]]
-# name = "prod-env"
-# type = "dotenv"
-# path = ".env.production"
+# name = "doppler-prod"
+# type = "doppler"
 # environment = "production"
+# token = "dp.st.xxxx"
+# project = "my-app"
+# config = "prd"
 "#
         .to_string()
     }
@@ -169,6 +177,25 @@ path = ".env"
         let config: RotaryConfig = toml::from_str(toml).unwrap();
         assert_eq!(config.scan.max_age_days, 90); // default
         assert_eq!(config.sources[0].environment, "default"); // default
+    }
+
+    #[test]
+    fn parse_config_with_connector_settings() {
+        let toml = r#"
+[[sources]]
+name = "doppler-prod"
+type = "doppler"
+environment = "production"
+token = "dp.st.xxxx"
+project = "my-app"
+config = "prd"
+"#;
+        let config: RotaryConfig = toml::from_str(toml).unwrap();
+        let source = &config.sources[0];
+        assert_eq!(source.source_type, "doppler");
+        assert_eq!(source.settings.get("token").unwrap(), "dp.st.xxxx");
+        assert_eq!(source.settings.get("project").unwrap(), "my-app");
+        assert_eq!(source.settings.get("config").unwrap(), "prd");
     }
 
     #[test]

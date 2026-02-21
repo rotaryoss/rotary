@@ -50,7 +50,7 @@ Non-Rust:
 
 The `scan` command reads from `rotary.toml` when run without `--source`. The config walks up parent directories (like `.gitignore`). Key fields:
 - `[scan]` — `max_age_days`, `warning_threshold_days`, `project_root` (for unused-secret detection)
-- `[[sources]]` — each entry has `name`, `type` ("dotenv"), `path`, `environment`
+- `[[sources]]` — each entry has `name`, `type`, `path`, `environment`, plus arbitrary connector-specific keys via `#[serde(flatten)]` into a `settings: HashMap<String, String>`. For example a Doppler source has `token`, `project`, `config` as extra keys on the same TOML table.
 
 `rotary init` generates a commented starter file. `rotary scan --source dotenv --path .env` bypasses the config entirely for ad-hoc use.
 
@@ -60,7 +60,7 @@ The `scan` command reads from `rotary.toml` when run without `--source`. The con
 2. Implement `SecretSource` for your struct (the trait is in `rotary-core`)
 3. Add `pub mod <name>;` to `connectors/mod.rs`
 4. Re-export from `lib.rs`
-5. Add a match arm in `crates/rotary-cli/src/commands/sources.rs` to wire it into the CLI
+5. Add a match arm in `crates/rotary-cli/src/commands/sources.rs` — the `build_source` function receives the full `SourceEntry`, so connector-specific settings are available via `entry.settings` (a `HashMap<String, String>`)
 
 ## Key Design Decisions
 

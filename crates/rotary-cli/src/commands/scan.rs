@@ -1,7 +1,7 @@
 use rotary_core::{RotaryConfig, RotaryError};
 use rotary_scanner::{ScanConfig, Scanner};
 
-use super::sources::build_source;
+use super::sources::{build_source, build_source_adhoc};
 use crate::output;
 
 pub async fn run(
@@ -12,10 +12,10 @@ pub async fn run(
     json: bool,
 ) -> Result<(), RotaryError> {
     if let Some(source_name) = source_flag {
-        // Explicit --source flag: single ad-hoc scan (original behavior).
+        // Explicit --source flag: single ad-hoc scan.
         let env = env_flag.unwrap_or("default");
         let max_age = max_age_flag.unwrap_or(90);
-        let source = build_source(source_name, path_flag, env)?;
+        let source = build_source_adhoc(source_name, path_flag, env)?;
         let cwd = std::env::current_dir().ok();
         let config = ScanConfig {
             max_age_days: max_age,
@@ -70,23 +70,19 @@ pub async fn run(
 
     for entry in &config.sources {
         // Resolve relative paths against the config file's directory.
-        let resolved_path = entry.path.as_ref().map(|p| {
+        let mut resolved = entry.clone();
+        if let Some(ref p) = resolved.path {
             let pb = std::path::PathBuf::from(p);
             if pb.is_relative() {
-                config_dir.join(pb).to_string_lossy().into_owned()
-            } else {
-                p.clone()
+                resolved.path = Some(config_dir.join(pb).to_string_lossy().into_owned());
             }
-        });
+        }
+        if let Some(env_override) = env_flag {
+            resolved.environment = env_override.to_string();
+        }
 
-        let env = env_flag.unwrap_or(&entry.environment);
-        let source = build_source(
-            &entry.source_type,
-            resolved_path.as_deref(),
-            env,
-        )?;
-
-        let report = scanner.scan(source.as_ref(), env).await?;
+        let source = build_source(&resolved)?;
+        let report = scanner.scan(source.as_ref(), &resolved.environment).await?;
 
         if json {
             let out = serde_json::to_string_pretty(&report)
@@ -99,4 +95,3 @@ pub async fn run(
 
     Ok(())
 }
-
