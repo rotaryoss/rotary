@@ -21,6 +21,9 @@ $ rotary scan
 ## Install
 
 ```bash
+# Homebrew (macOS / Linux)
+brew install rotaryoss/tap/rotary
+
 # From crates.io
 cargo install rotaryoss-cli
 
@@ -47,6 +50,9 @@ rotary details STRIPE_SECRET_KEY
 
 # Machine-readable output
 rotary scan --json
+
+# CI gate — fail if health score drops below 70
+rotary check --threshold 70
 ```
 
 ## How It Works
@@ -54,10 +60,27 @@ rotary scan --json
 Rotary runs three health checks against each secret:
 
 1. **Rotation age** — flags secrets that haven't been rotated within a configurable threshold (default: 90 days critical, 75 days warning)
-2. **Missing owner** — flags secrets with no assigned owner
+2. **Missing owner** — flags secrets with no assigned owner (see [Owner Mapping](#owner-mapping) to assign owners)
 3. **Unreferenced** — scans your codebase to find secrets that exist in the vault but aren't used anywhere
 
 Each check produces a severity (OK, Warning, Critical) and the worst wins. The health score is computed across all secrets: Critical = 1.0 deduction, Warning = 0.5, normalized over total count.
+
+## CI Integration
+
+Use `rotary check` to enforce secret health in your CI pipeline. It exits with code 2 if the health score falls below the threshold:
+
+```yaml
+# .github/workflows/secret-health.yml
+name: Secret Health
+on: [push]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo install rotaryoss-cli
+      - run: rotary check --threshold 70
+```
 
 ## Connectors
 
@@ -66,16 +89,30 @@ Each vault integration implements the `SecretSource` trait from `rotary-core`. R
 | Connector | Status |
 |-----------|--------|
 | `.env` files | Available |
-| Doppler | Planned |
+| Doppler | Available |
 | AWS Secrets Manager | Planned |
 | HashiCorp Vault | Planned |
+
+### Doppler
+
+Add a Doppler source to `rotary.toml`:
+
+```toml
+[[sources]]
+name = "doppler-prod"
+type = "doppler"
+environment = "production"
+token = "dp.st.xxxx"
+project = "my-app"
+config = "prd"
+```
 
 ### Writing a Connector
 
 Implement the `SecretSource` trait:
 
 ```rust
-use rotary_core::{SecretSource, SecretMetadata, AuditEntry, RotaryError};
+use rotaryoss_core::{SecretSource, SecretMetadata, AuditEntry, RotaryError};
 
 #[async_trait::async_trait]
 impl SecretSource for MyVault {
@@ -94,7 +131,27 @@ impl SecretSource for MyVault {
 }
 ```
 
-See the [dotenv connector](crates/rotary-connectors/src/connectors/dotenv.rs) for a complete example.
+See the [dotenv connector](crates/rotary-connectors/src/connectors/dotenv.rs) or [Doppler connector](crates/rotary-connectors/src/connectors/doppler.rs) for complete examples.
+
+## Owner Mapping
+
+Create a `.rotary-owners.toml` file to assign owners to secrets by pattern. This resolves the "no owner" warning for sources that don't have native ownership metadata (like `.env` files):
+
+```toml
+[[owners]]
+pattern = "STRIPE_*"
+owner = "payments-team"
+
+[[owners]]
+pattern = "DATABASE_*"
+owner = "infra-team"
+
+[[owners]]
+pattern = "SENDGRID_*"
+owner = "marketing-eng"
+```
+
+Patterns use glob syntax (`*` matches any characters). Rules are evaluated in order — first match wins. The file is discovered by walking up from the current directory, similar to `rotary.toml`.
 
 ## Rotation Playbooks
 
@@ -144,8 +201,8 @@ environment = "production"
 
 ```
 crates/
-├── rotary-core/        # SecretSource trait, types, config, playbooks
-├── rotary-connectors/  # Vault integrations
+├── rotary-core/        # SecretSource trait, types, config, playbooks, owner mapping
+├── rotary-connectors/  # Vault integrations (dotenv, Doppler)
 ├── rotary-scanner/     # Health check engine
 └── rotary-cli/         # The `rotary` binary
 playbooks/              # Rotation playbook definitions

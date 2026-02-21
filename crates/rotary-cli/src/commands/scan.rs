@@ -1,4 +1,4 @@
-use rotaryoss_core::{RotaryConfig, RotaryError};
+use rotaryoss_core::{OwnersConfig, RotaryConfig, RotaryError};
 use rotaryoss_scanner::{ScanConfig, Scanner};
 
 use super::sources::{build_source, build_source_adhoc};
@@ -11,18 +11,23 @@ pub async fn run(
     max_age_flag: Option<u64>,
     json: bool,
 ) -> Result<(), RotaryError> {
+    let cwd = std::env::current_dir().map_err(|e| RotaryError::Other(e.to_string()))?;
+    let owners = OwnersConfig::find_and_load(&cwd)?;
+
     if let Some(source_name) = source_flag {
         // Explicit --source flag: single ad-hoc scan.
         let env = env_flag.unwrap_or("default");
         let max_age = max_age_flag.unwrap_or(90);
         let source = build_source_adhoc(source_name, path_flag, env)?;
-        let cwd = std::env::current_dir().ok();
         let config = ScanConfig {
             max_age_days: max_age,
             warning_threshold_days: max_age.saturating_sub(15),
-            project_root: cwd,
+            project_root: Some(cwd),
         };
-        let scanner = Scanner::new(config);
+        let mut scanner = Scanner::new(config);
+        if let Some(owners) = owners {
+            scanner = scanner.with_owners(owners);
+        }
         let report = scanner.scan(source.as_ref(), env).await?;
 
         if json {
@@ -36,7 +41,6 @@ pub async fn run(
     }
 
     // No --source flag: load from rotary.toml.
-    let cwd = std::env::current_dir().map_err(|e| RotaryError::Other(e.to_string()))?;
     let (config, config_dir) = RotaryConfig::find_and_load(&cwd)?
         .ok_or_else(|| {
             RotaryError::Config(
@@ -66,7 +70,10 @@ pub async fn run(
             .unwrap_or(config.scan.warning_threshold_days),
         project_root: Some(project_root),
     };
-    let scanner = Scanner::new(scan_config);
+    let mut scanner = Scanner::new(scan_config);
+    if let Some(owners) = owners {
+        scanner = scanner.with_owners(owners);
+    }
 
     for entry in &config.sources {
         // Resolve relative paths against the config file's directory.

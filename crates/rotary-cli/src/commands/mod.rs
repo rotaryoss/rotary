@@ -1,3 +1,4 @@
+pub mod check;
 pub mod details;
 pub mod init;
 pub mod scan;

@@ -1,18 +1,30 @@
 use std::collections::HashSet;
 
 use chrono::Utc;
-use rotaryoss_core::{HealthCheck, HealthReport, HealthScore, RotaryError, SecretSource, Severity};
+use rotaryoss_core::{
+    HealthCheck, HealthReport, HealthScore, OwnersConfig, RotaryError, SecretSource, Severity,
+};
 
 use crate::rules::ScanConfig;
 use crate::usage;
 
 pub struct Scanner {
     config: ScanConfig,
+    owners: Option<OwnersConfig>,
 }
 
 impl Scanner {
     pub fn new(config: ScanConfig) -> Self {
-        Self { config }
+        Self {
+            config,
+            owners: None,
+        }
+    }
+
+    /// Attach an owner mapping that overrides missing owners before health checks.
+    pub fn with_owners(mut self, owners: OwnersConfig) -> Self {
+        self.owners = Some(owners);
+        self
     }
 
     /// Run all health checks against a secret source and produce a report.
@@ -21,7 +33,19 @@ impl Scanner {
         source: &dyn SecretSource,
         environment: &str,
     ) -> Result<HealthReport, RotaryError> {
-        let secrets = source.list_secrets().await?;
+        let mut secrets = source.list_secrets().await?;
+
+        // Apply owner overrides from .rotary-owners.toml.
+        if let Some(ref owners) = self.owners {
+            for secret in &mut secrets {
+                if secret.owner.is_none() {
+                    if let Some(owner) = owners.resolve_owner(&secret.key) {
+                        secret.owner = Some(owner.to_string());
+                    }
+                }
+            }
+        }
+
         let total_secrets = secrets.len();
         let now = Utc::now();
 

@@ -1,4 +1,4 @@
-use rotaryoss_connectors::DotEnvSource;
+use rotaryoss_connectors::{DopplerSource, DotEnvSource};
 use rotaryoss_core::{RotaryError, SecretSource, SourceEntry};
 
 /// Build a `SecretSource` from a config entry.
@@ -13,8 +13,40 @@ pub fn build_source(entry: &SourceEntry) -> Result<Box<dyn SecretSource>, Rotary
             })?;
             Ok(Box::new(DotEnvSource::new(path, &entry.environment)))
         }
+        "doppler" => {
+            let token = entry
+                .settings
+                .get("token")
+                .ok_or_else(|| {
+                    RotaryError::Config("'token' is required for the doppler source".into())
+                })?
+                .clone();
+            let project = entry
+                .settings
+                .get("project")
+                .ok_or_else(|| {
+                    RotaryError::Config("'project' is required for the doppler source".into())
+                })?
+                .clone();
+            let config = entry
+                .settings
+                .get("config")
+                .ok_or_else(|| {
+                    RotaryError::Config(
+                        "'config' is required for the doppler source (e.g. \"prd\", \"stg\")"
+                            .into(),
+                    )
+                })?
+                .clone();
+            Ok(Box::new(DopplerSource::new(
+                token,
+                project,
+                config,
+                &entry.environment,
+            )))
+        }
         other => Err(RotaryError::Config(format!(
-            "unknown source type: {other}. Supported: dotenv"
+            "unknown source type: {other}. Supported: dotenv, doppler"
         ))),
     }
 }

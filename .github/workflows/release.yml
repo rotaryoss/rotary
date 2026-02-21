@@ -109,3 +109,36 @@ jobs:
           publish rotaryoss-scanner
           sleep 30
           publish rotaryoss-cli
+
+  update-homebrew:
+    name: Update Homebrew Tap
+    needs: publish-github
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Compute SHA256 hashes
+        id: hashes
+        run: |
+          echo "aarch64_darwin=$(sha256sum artifacts/rotary-aarch64-apple-darwin.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "x86_64_darwin=$(sha256sum artifacts/rotary-x86_64-apple-darwin.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "aarch64_linux=$(sha256sum artifacts/rotary-aarch64-unknown-linux-gnu.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "x86_64_linux=$(sha256sum artifacts/rotary-x86_64-unknown-linux-gnu.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Update formula
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          repository: rotaryoss/homebrew-tap
+          event-type: update-formula
+          client-payload: |
+            {
+              "version": "${{ github.ref_name }}",
+              "aarch64_darwin_sha256": "${{ steps.hashes.outputs.aarch64_darwin }}",
+              "x86_64_darwin_sha256": "${{ steps.hashes.outputs.x86_64_darwin }}",
+              "aarch64_linux_sha256": "${{ steps.hashes.outputs.aarch64_linux }}",
+              "x86_64_linux_sha256": "${{ steps.hashes.outputs.x86_64_linux }}"
+            }

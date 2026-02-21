@@ -63,6 +63,20 @@ enum Commands {
         env: Option<String>,
     },
 
+    /// Check that health scores meet a minimum threshold.
+    ///
+    /// Scans all sources from rotary.toml and exits with code 2 if any
+    /// source's health score falls below the threshold. Designed for CI.
+    Check {
+        /// Minimum acceptable health score (0–100). Default: 70.
+        #[arg(short, long, default_value = "70")]
+        threshold: u8,
+
+        /// Output as JSON instead of the formatted report.
+        #[arg(long)]
+        json: bool,
+    },
+
     /// Create a starter rotary.toml in the current directory.
     Init,
 }
@@ -102,6 +116,13 @@ async fn main() {
             path,
             env,
         } => commands::details::run(&key, source.as_deref(), path.as_deref(), env.as_deref()).await,
+        Commands::Check { threshold, json } => match commands::check::run(threshold, json).await {
+            Ok(code) => std::process::exit(code),
+            Err(e) => {
+                eprintln!("error: {e}");
+                std::process::exit(1);
+            }
+        },
         Commands::Init => {
             let cwd = std::env::current_dir().unwrap_or_else(|_| ".".into());
             commands::init::run(&cwd)
