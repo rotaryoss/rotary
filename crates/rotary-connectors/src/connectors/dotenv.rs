@@ -51,12 +51,13 @@ impl DotEnvSource {
 #[async_trait::async_trait]
 impl SecretSource for DotEnvSource {
     async fn list_secrets(&self) -> Result<Vec<SecretMetadata>, RotaryError> {
-        let contents = tokio::fs::read_to_string(&self.path).await.map_err(|e| {
-            RotaryError::Connector {
-                source_name: self.source_name().to_string(),
-                message: format!("failed to read {}: {e}", self.path.display()),
-            }
-        })?;
+        let contents =
+            tokio::fs::read_to_string(&self.path)
+                .await
+                .map_err(|e| RotaryError::Connector {
+                    source_name: self.source_name().to_string(),
+                    message: format!("failed to read {}: {e}", self.path.display()),
+                })?;
 
         let modified = Self::file_modified_time(&self.path);
         let keys = Self::parse_keys(&contents);
@@ -102,7 +103,10 @@ API_KEY=secret123
 MALFORMED_LINE
 "#;
         let keys = DotEnvSource::parse_keys(input);
-        assert_eq!(keys, vec!["DATABASE_URL", "REDIS_URL", "API_KEY", "MALFORMED_LINE"]);
+        assert_eq!(
+            keys,
+            vec!["DATABASE_URL", "REDIS_URL", "API_KEY", "MALFORMED_LINE"]
+        );
     }
 
     #[test]

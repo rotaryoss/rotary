@@ -58,9 +58,8 @@ pub fn load_playbooks(dir: &Path) -> Result<Vec<Playbook>, RotaryError> {
         }
 
         let contents = std::fs::read_to_string(&path)?;
-        let playbook: Playbook = toml::from_str(&contents).map_err(|e| {
-            RotaryError::Config(format!("failed to parse {}: {e}", path.display()))
-        })?;
+        let playbook: Playbook = toml::from_str(&contents)
+            .map_err(|e| RotaryError::Config(format!("failed to parse {}: {e}", path.display())))?;
         playbooks.push(playbook);
     }
 

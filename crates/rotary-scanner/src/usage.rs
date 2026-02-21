@@ -79,10 +79,7 @@ mod tests {
         let src = dir.path().join("app.rs");
         fs::write(&src, r#"let url = std::env::var("DATABASE_URL").unwrap();"#).unwrap();
 
-        let keys = vec![
-            "DATABASE_URL".to_string(),
-            "GHOST_KEY".to_string(),
-        ];
+        let keys = vec!["DATABASE_URL".to_string(), "GHOST_KEY".to_string()];
 
         let unreferenced = find_unreferenced_keys(&keys, dir.path());
         assert!(unreferenced.contains("GHOST_KEY"));

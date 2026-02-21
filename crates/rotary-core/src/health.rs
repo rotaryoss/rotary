@@ -59,8 +59,16 @@ mod tests {
     #[test]
     fn score_all_ok() {
         let checks = vec![
-            HealthCheck { key: "A".into(), severity: Severity::Ok, reason: String::new() },
-            HealthCheck { key: "B".into(), severity: Severity::Ok, reason: String::new() },
+            HealthCheck {
+                key: "A".into(),
+                severity: Severity::Ok,
+                reason: String::new(),
+            },
+            HealthCheck {
+                key: "B".into(),
+                severity: Severity::Ok,
+                reason: String::new(),
+            },
         ];
         assert_eq!(HealthScore::compute(&checks).0, 100);
     }
@@ -68,10 +76,26 @@ mod tests {
     #[test]
     fn score_mixed() {
         let checks = vec![
-            HealthCheck { key: "A".into(), severity: Severity::Critical, reason: String::new() },
-            HealthCheck { key: "B".into(), severity: Severity::Warning, reason: String::new() },
-            HealthCheck { key: "C".into(), severity: Severity::Ok, reason: String::new() },
-            HealthCheck { key: "D".into(), severity: Severity::Ok, reason: String::new() },
+            HealthCheck {
+                key: "A".into(),
+                severity: Severity::Critical,
+                reason: String::new(),
+            },
+            HealthCheck {
+                key: "B".into(),
+                severity: Severity::Warning,
+                reason: String::new(),
+            },
+            HealthCheck {
+                key: "C".into(),
+                severity: Severity::Ok,
+                reason: String::new(),
+            },
+            HealthCheck {
+                key: "D".into(),
+                severity: Severity::Ok,
+                reason: String::new(),
+            },
         ];
         // deductions: 1.0 + 0.5 + 0 + 0 = 1.5 out of 4 → (1 - 0.375) * 100 = 62.5 → 63
         assert_eq!(HealthScore::compute(&checks).0, 63);
@@ -80,8 +104,16 @@ mod tests {
     #[test]
     fn score_all_critical() {
         let checks = vec![
-            HealthCheck { key: "A".into(), severity: Severity::Critical, reason: String::new() },
-            HealthCheck { key: "B".into(), severity: Severity::Critical, reason: String::new() },
+            HealthCheck {
+                key: "A".into(),
+                severity: Severity::Critical,
+                reason: String::new(),
+            },
+            HealthCheck {
+                key: "B".into(),
+                severity: Severity::Critical,
+                reason: String::new(),
+            },
         ];
         assert_eq!(HealthScore::compute(&checks).0, 0);
     }

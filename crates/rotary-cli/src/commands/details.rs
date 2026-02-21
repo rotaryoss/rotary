@@ -25,8 +25,7 @@ pub async fn run(
     } else {
         let (config, config_dir) = RotaryConfig::find_and_load(&cwd)?.ok_or_else(|| {
             RotaryError::Config(
-                "no rotary.toml found. Run `rotary init` or use --source for ad-hoc lookup."
-                    .into(),
+                "no rotary.toml found. Run `rotary init` or use --source for ad-hoc lookup.".into(),
             )
         })?;
 
@@ -44,8 +43,7 @@ pub async fn run(
                 if let Some(ref p) = resolved.path {
                     let pb = PathBuf::from(p);
                     if pb.is_relative() {
-                        resolved.path =
-                            Some(config_dir.join(pb).to_string_lossy().into_owned());
+                        resolved.path = Some(config_dir.join(pb).to_string_lossy().into_owned());
                     }
                 }
                 if let Some(env_override) = env_flag {

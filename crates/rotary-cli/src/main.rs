@@ -4,7 +4,11 @@ mod output;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "rotary", version, about = "Audit secret health across your vaults")]
+#[command(
+    name = "rotary",
+    version,
+    about = "Audit secret health across your vaults"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -97,15 +101,7 @@ async fn main() {
             source,
             path,
             env,
-        } => {
-            commands::details::run(
-                &key,
-                source.as_deref(),
-                path.as_deref(),
-                env.as_deref(),
-            )
-            .await
-        }
+        } => commands::details::run(&key, source.as_deref(), path.as_deref(), env.as_deref()).await,
         Commands::Init => {
             let cwd = std::env::current_dir().unwrap_or_else(|_| ".".into());
             commands::init::run(&cwd)

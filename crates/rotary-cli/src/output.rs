@@ -3,10 +3,7 @@ use rotary_core::{HealthReport, Playbook, SecretMetadata, Severity};
 
 pub fn print_report(report: &HealthReport) {
     println!();
-    println!(
-        "  {}",
-        "ROTARY — Secret Health Report".bold()
-    );
+    println!("  {}", "ROTARY — Secret Health Report".bold());
     println!(
         "  {} · {} secrets · scanned just now",
         capitalize(&report.environment).dimmed(),
@@ -72,11 +69,7 @@ pub fn print_details(
         };
         println!("  {:<16} {display}", "Last rotated".dimmed());
     } else {
-        println!(
-            "  {:<16} {}",
-            "Last rotated".dimmed(),
-            "unknown".yellow()
-        );
+        println!("  {:<16} {}", "Last rotated".dimmed(), "unknown".yellow());
     }
 
     if let Some(accessed) = meta.last_accessed {
@@ -89,11 +82,7 @@ pub fn print_details(
 
     match &meta.owner {
         Some(owner) => println!("  {:<16} {owner}", "Owner".dimmed()),
-        None => println!(
-            "  {:<16} {}",
-            "Owner".dimmed(),
-            "unassigned".yellow()
-        ),
+        None => println!("  {:<16} {}", "Owner".dimmed(), "unassigned".yellow()),
     }
 
     // Playbook section
@@ -111,10 +100,7 @@ pub fn print_details(
             println!("  {num} {:<12} {}", action.cyan(), step.description);
         }
     } else {
-        println!(
-            "  {}",
-            "No matching rotation playbook found.".dimmed()
-        );
+        println!("  {}", "No matching rotation playbook found.".dimmed());
         println!(
             "  {}",
             "Add one in playbooks/ with a matching pattern.".dimmed()
